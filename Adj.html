@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Update Gift Code</title>
+
+<style>
+    body {
+        background: #000;
+        font-family: "Poppins", sans-serif;
+        padding: 20px;
+        color: #00ff80;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 28px;
+        text-shadow: 0 0 8px #00ff80;
+    }
+
+    .admin-box {
+        margin-top: 20px;
+        border: 2px solid #00ff80;
+        padding: 20px;
+        border-radius: 16px;
+        background: rgba(0,255,128,0.06);
+        backdrop-filter: blur(6px);
+    }
+
+    label {
+        font-size: 16px;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 2px solid #00ff80;
+        background: transparent;
+        color: #00ff80;
+        font-size: 16px;
+        margin-top: 8px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 15px;
+        border-radius: 12px;
+        border: 2px solid #00ff80;
+        background: transparent;
+        color: #00ff80;
+        font-size: 18px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #00ff80;
+        color: #000;
+    }
+
+    .success {
+        margin-top: 15px;
+        text-align: center;
+        color: #00ff80;
+        opacity: 0.9;
+    }
+</style>
+
+</head>
+<body>
+
+<h2>Admin Panel – Update Gift Code</h2>
+
+<div class="admin-box">
+    <label>Enter Gift Code</label>
+    <input type="text" id="codeInput" placeholder="Example: 1A2B3C4D">
+
+    <button onclick="saveCode()">Save Code</button>
+
+    <div class="success" id="msg"></div>
+</div>
+
+<script>
+function saveCode() {
+    const code = document.getElementById("codeInput").value;
+
+    if (!code) {
+        document.getElementById("msg").innerText = "❌ Please enter a code";
+        return;
+    }
+
+    const today = new Date().toLocaleDateString("en-GB");
+
+    localStorage.setItem("giftCode", code);
+    localStorage.setItem("giftUpdated", today);
+
+    document.getElementById("msg").innerText = "✅ Gift Code Updated Successfully!";
+}
+</script>
+
+</body>
+</html>
