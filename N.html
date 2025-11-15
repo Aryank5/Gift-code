@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gift Codes</title>
+
+<style>
+    body {
+        background: #000;
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        padding: 20px;
+        color: #e6ffe6;
+    }
+
+    .title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #00ff80;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .gift-container {
+        margin-top: 20px;
+        border: 2px solid #00ff80;
+        border-radius: 18px;
+        padding: 20px;
+        background: rgba(0, 255, 128, 0.05);
+        backdrop-filter: blur(6px);
+    }
+
+    .gift-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .app-logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        border: 2px solid #00ff80;
+    }
+
+    .app-name {
+        font-size: 22px;
+        margin-left: 10px;
+        color: #00ff80;
+        font-weight: 600;
+        text-shadow: 0 0 6px #00ff80;
+    }
+
+    .register-btn {
+        color: #00aaff;
+        padding: 10px 18px;
+        border: 2px solid #00aaff;
+        border-radius: 14px;
+        text-decoration: none;
+        font-size: 16px;
+        transition: 0.3s;
+    }
+
+    .register-btn:hover {
+        background: #00aaff;
+        color: #000;
+    }
+
+    .code-box {
+        margin-top: 18px;
+        border: 2px solid #00ff80;
+        padding: 15px;
+        border-radius: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0, 255, 120, 0.1);
+    }
+
+    .code-text {
+        font-size: 18px;
+        color: #e6ffe6;
+        font-weight: 500;
+    }
+
+    .copy-btn {
+        background: transparent;
+        border: 2px solid #00ff80;
+        padding: 10px;
+        border-radius: 10px;
+        cursor: pointer;
+        color: #00ff80;
+        font-size: 20px;
+        transition: 0.3s;
+    }
+
+    .copy-btn:hover {
+        background: #00ff80;
+        color: #000;
+    }
+
+    .update {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 14px;
+        opacity: 0.8;
+    }
+
+    /* Toast */
+    #giftToast {
+        position: fixed;
+        top: -60px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,255,120,0.2);
+        border: 2px solid #00ff80;
+        padding: 12px 25px;
+        border-radius: 14px;
+        backdrop-filter: blur(10px);
+        color: #00ff80;
+        font-size: 16px;
+        font-weight: 600;
+        text-shadow: 0 0 8px #00ff80;
+        box-shadow: 0 0 12px #00ff80;
+        opacity: 0;
+        transition: 0.45s ease;
+        z-index: 99999;
+    }
+
+    #giftToast.show {
+        top: 20px;
+        opacity: 1;
+    }
+</style>
+</head>
+<body>
+
+<h2 class="title">🎁 Gift Codes</h2>
+
+<div class="gift-container"> 
+    <div class="gift-header">
+        <div style="display: flex; align-items: center;">
+            <img src="https://i.ibb.co/Mh0bJpW/dmwin.jpg" class="app-logo">
+            <span class="app-name">DmWin</span>
+        </div>
+        <a href="#" class="register-btn">Register</a>
+    </div>
+
+    <div class="code-box">
+        <div>
+            <div style="opacity: 0.7;">Gift Code:</div>
+            <div id="giftCode" class="code-text">Loading...</div>
+        </div>
+        <button class="copy-btn" onclick="copyGiftCode()">📋</button>
+    </div>
+
+    <div class="update" id="updateDate">Updated: --/--/----</div>
+</div>
+
+<div id="giftToast">🎁 Gift Code Copied!</div>
+
+<script>
+function loadGiftCode() {
+    const code = localStorage.getItem("giftCode") || "No Code Found";
+    const date = localStorage.getItem("giftUpdated") || "--/--/----";
+
+    document.getElementById("giftCode").innerText = code;
+    document.getElementById("updateDate").innerText = "Updated: " + date;
+}
+
+function copyGiftCode() {
+    const code = document.getElementById("giftCode").innerText;
+    navigator.clipboard.writeText(code);
+
+    const toast = document.getElementById("giftToast");
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 1600);
+}
+
+loadGiftCode();
+</script>
+
+</body>
+</html>
