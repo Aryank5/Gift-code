@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Gift Hub — Admin</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<style>
+:root{--bg:#050505;--text:#e6ffe6;--accent:#00ff80;--muted:rgba(255,255,255,0.06);--radius:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(180deg,#000,#051018);color:var(--text);font-family:Poppins,system-ui;padding:20px;min-height:100vh}
+.header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.header h1{color:var(--accent)}
+.container{max-width:980px;margin:18px auto}
+.card{background:rgba(255,255,255,0.02);border:1px solid var(--muted);padding:16px;border-radius:var(--radius);margin-bottom:14px}
+.row{display:flex;gap:10px;align-items:center}
+.input,textarea,select{background:transparent;border:1px solid var(--muted);color:var(--text);padding:8px;border-radius:8px;width:100%}
+.small{width:140px}
+.btn{background:transparent;border:1px solid var(--accent);padding:8px 12px;border-radius:10px;color:var(--accent);cursor:pointer}
+.btn.warn{border-color:#ff6b6b;color:#ff6b6b}
+.codes-list{margin-top:12px;display:grid;gap:8px}
+.code-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;border:1px dashed rgba(255,255,255,0.03)}
+.footer{opacity:.7;font-size:13px;text-align:center;margin-top:12px}
+.lock-note{font-size:13px;opacity:.8;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1><i class="fas fa-tools"></i> Admin Panel</h1>
+    <div>Local-only admin — change password below</div>
+  </div>
+
+  <div id="authWrap" class="card">
+    <div class="lock-note">Enter admin password to access admin features.</div>
+    <div class="row">
+      <input id="passwordInput" class="input small" type="password" placeholder="Admin password">
+      <button id="loginBtn" class="btn">Unlock</button>
+      <button id="changePassBtn" class="btn" title="Change default password">Change default</button>
+    </div>
+    <div style="margin-top:8px;font-size:13px;opacity:.8">
+      Default password for demo: <strong>admin123</strong>. Change it!
+    </div>
+  </div>
+
+  <div id="adminArea" style="display:none">
+    <div class="card">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+        <input id="newCodeInput" class="input" placeholder="Enter new gift code (e.g. DMWIN1234)">
+        <button id="addCodeBtn" class="btn">Add Code</button>
+        <button id="setCurrentBtn" class="btn">Set as Active</button>
+        <button id="clearAllBtn" class="btn warn">Clear All</button>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+        <div style="flex:1">
+          <label style="display:block;font-size:13px;opacity:.8;margin-bottom:6px">Register link (public page)</label>
+          <input id="registerLinkInput" class="input" placeholder="https://example.com/register">
+        </div>
+        <div style="width:220px">
+          <label style="display:block;font-size:13px;opacity:.8;margin-bottom:6px">Update date</label>
+          <input id="updateDateInput" class="input small" placeholder="DD/MM/YYYY">
+        </div>
+        <div style="width:150px">
+          <label style="display:block;font-size:13px;opacity:.8;margin-bottom:6px">APK key (optional)</label>
+          <input id="apkKeyInput" class="input small" placeholder="APK_KEY">
+        </div>
+      </div>
+
+      <div>
+        <strong>Active code / codes list</strong>
+        <div class="codes-list" id="codesList"></div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button id="saveSettingsBtn" class="btn">Save Settings</button>
+        <button id="exportBtn" class="btn">Export JSON</button>
+        <button id="importBtn" class="btn">Import JSON</button>
+        <input id="fileInput" type="file" accept="application/json" style="display:none">
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="margin-bottom:8px">LocalStorage keys used:</div>
+      <code>giftHub_codes</code>, <code>giftHub_active</code>, <code>giftHub_current</code>, <code>giftHub_updated</code>, <code>giftHub_register</code>, <code>giftHub_apk</code>
+    </div>
+
+    <div class="footer">Note: This admin panel is client-side only. For real security, run this behind an authenticated backend.</div>
+  </div>
+</div>
+
+<script>
+/* Simple admin logic, client-only */
+const DEFAULT_PASS = 'admin123'; // change immediately
+const loginBtn = document.getElementById('loginBtn');
+const passwordInput = document.getElementById('passwordInput');
+const authWrap = document.getElementById('authWrap');
+const adminArea = document.getElementById('adminArea');
+const changePassBtn = document.getElementById('changePassBtn');
+
+function getStoredPass(){ return localStorage.getItem('giftHub_admin_pass') || DEFAULT_PASS; }
+function setStoredPass(p){ localStorage.setItem('giftHub_admin_pass', p); }
+
+loginBtn.addEventListener('click', ()=> {
+  const attempt = passwordInput.value || '';
+  if(attempt === getStoredPass()){
+    openAdmin();
+  } else {
+    alert('Wrong password');
+  }
+});
+
+changePassBtn.addEventListener('click', ()=>{
+  const newp = prompt('Enter new admin password (will be stored in localStorage):');
+  if(newp){
+    setStoredPass(newp);
+    alert('Password changed. Keep it safe.');
+  }
+});
+
+function openAdmin(){
+  authWrap.style.display='none';
+  adminArea.style.display='';
+  loadAdminData();
+}
+
+/* Admin UI elements */
+const newCodeInput = document.getElementById('newCodeInput');
+const addCodeBtn = document.getElementById('addCodeBtn');
+const codesList = document.getElementById('codesList');
+const setCurrentBtn = document.getElementById('setCurrentBtn');
+const clearAllBtn = document.getElementById('clearAllBtn');
+const registerLinkInput = document.getElementById('registerLinkInput');
+const updateDateInput = document.getElementById('updateDateInput');
+const apkKeyInput = document.getElementById('apkKeyInput');
+const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+const exportBtn = document.getElementById('exportBtn');
+const importBtn = document.getElementById('importBtn');
+const fileInput = document.getElementById('fileInput');
+
+function loadAdminData(){
+  const raw = localStorage.getItem('giftHub_codes');
+  const arr = raw ? JSON.parse(raw) : [];
+  codesList.innerHTML = '';
+  arr.forEach((it, idx) => {
+    const el = document.createElement('div');
+    el.className='code-item';
+    const label = document.createElement('div');
+    label.innerText = (typeof it === 'object' && it.code) ? it.code : it;
+    const actions = document.createElement('div');
+    actions.style.display='flex'; actions.style.gap='8px';
+    const setBtn = document.createElement('button'); setBtn.className='btn'; setBtn.innerText='Set Active';
+    const delBtn = document.createElement('button'); delBtn.className='btn warn'; delBtn.innerText='Delete';
+    setBtn.onclick = ()=> {
+      localStorage.setItem('giftHub_active', idx.toString());
+      alert('Active set to ' + label.innerText + '. Public page will reflect on next load.');
+      loadAdminData();
+    };
+    delBtn.onclick = ()=> {
+      if(!confirm('Delete this code?')) return;
+      arr.splice(idx,1);
+      localStorage.setItem('giftHub_codes', JSON.stringify(arr));
+      loadAdminData();
+    };
+    actions.appendChild(setBtn); actions.appendChild(delBtn);
+    el.appendChild(label); el.appendChild(actions);
+    codesList.appendChild(el);
+  });
+
+  // fill inputs
+  registerLinkInput.value = localStorage.getItem('giftHub_register') || '';
+  updateDateInput.value = localStorage.getItem('giftHub_updated') || '';
+  apkKeyInput.value = localStorage.getItem('giftHub_apk') || '';
+}
+
+addCodeBtn.addEventListener('click', ()=>{
+  const v = (newCodeInput.value || '').trim();
+  if(!v){ alert('Enter a code'); return; }
+  const raw = localStorage.getItem('giftHub_codes');
+  const arr = raw ? JSON.parse(raw) : [];
+  arr.push(v);
+  localStorage.setItem('giftHub_codes', JSON.stringify(arr));
+  newCodeInput.value='';
+  loadAdminData();
+});
+
+setCurrentBtn.addEventListener('click', ()=>{
+  const v = (newCodeInput.value || '').trim();
+  if(!v){ alert('Enter a code in the field to set as single active'); return; }
+  localStorage.setItem('giftHub_current', v);
+  localStorage.setItem('giftHub_updated', updateDateInput.value || new Date().toLocaleDateString());
+  alert('Set current active as: ' + v);
+});
+
+clearAllBtn.addEventListener('click', ()=>{
+  if(confirm('Clear all codes and settings?')) {
+    ['giftHub_codes','giftHub_active','giftHub_current','giftHub_updated','giftHub_register','giftHub_apk'].forEach(k=>localStorage.removeItem(k));
+    loadAdminData();
+    alert('Cleared');
+  }
+});
+
+saveSettingsBtn.addEventListener('click', ()=>{
+  localStorage.setItem('giftHub_register', registerLinkInput.value || '');
+  localStorage.setItem('giftHub_updated', updateDateInput.value || new Date().toLocaleDateString());
+  localStorage.setItem('giftHub_apk', apkKeyInput.value || '');
+  alert('Saved settings');
+});
+
+exportBtn.addEventListener('click', ()=>{
+  const exportObj = {
+    codes: JSON.parse(localStorage.getItem('giftHub_codes') || '[]'),
+    active: localStorage.getItem('giftHub_active') || null,
+    current: localStorage.getItem('giftHub_current') || null,
+    updated: localStorage.getItem('giftHub_updated') || null,
+    register: localStorage.getItem('giftHub_register') || '',
+    apk: localStorage.getItem('giftHub_apk') || ''
+  };
+  const blob = new Blob([JSON.stringify(exportObj, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='giftHub_export.json'; a.click(); URL.revokeObjectURL(url);
+});
+
+importBtn.addEventListener('click', ()=> fileInput.click());
+fileInput.addEventListener('change', (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(data.codes) localStorage.setItem('giftHub_codes', JSON.stringify(data.codes));
+      if(data.active !== undefined && data.active !== null) localStorage.setItem('giftHub_active', data.active.toString());
+      if(data.current) localStorage.setItem('giftHub_current', data.current);
+      if(data.updated) localStorage.setItem('giftHub_updated', data.updated);
+      if(data.register) localStorage.setItem('giftHub_register', data.register);
+      if(data.apk) localStorage.setItem('giftHub_apk', data.apk);
+      alert('Imported');
+      loadAdminData();
+    }catch(err){ alert('Invalid file'); }
+  };
+  reader.readAsText(f);
+});
+
+/* On load: fill fields if admin opened directly (for convenience) */
+(function onload(){
+  const defaultReg = localStorage.getItem('giftHub_register') || '';
+  if(defaultReg) registerLinkInput.value = defaultReg;
+  const upd = localStorage.getItem('giftHub_updated') || '';
+  if(upd) updateDateInput.value = upd;
+  const apk = localStorage.getItem('giftHub_apk') || '';
+  if(apk) apkKeyInput.value = apk;
+  loadAdminData();
+})();
+</script>
+</body>
+</html>
