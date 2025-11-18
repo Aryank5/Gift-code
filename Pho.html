@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Panel — Firebase Image Manager</title>
+
+  <!-- Firebase (compat libs for simple API: firebase.initializeApp, firebase.storage, firebase.database) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+  <style>
+    :root{
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --accent:#1a73e8;
+      --danger:#e53e3e;
+      --radius:12px;
+      --maxw:980px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:var(--bg);
+      color:#111827;
+      padding:28px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:var(--maxw);
+      background:transparent;
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:20px;
+    }
+
+    /* Left: dashboard */
+    .panel{
+      background:var(--card);
+      padding:18px;
+      border-radius:var(--radius);
+      box-shadow:0 6px 20px rgba(13,18,25,0.06);
+    }
+
+    header .title{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+    }
+    h1{font-size:20px;margin:0}
+    .subtitle{color:var(--muted); font-size:13px;margin-top:6px}
+
+    /* Upload box */
+    .upload-box{
+      margin-top:12px;
+      border:2px dashed #d1d5db;
+      padding:20px;
+      border-radius:10px;
+      text-align:center;
+      cursor:pointer;
+      transition:all .15s ease;
+      user-select:none;
+    }
+    .upload-box.dragover{
+      border-color:var(--accent);
+      background:rgba(26,115,232,0.05);
+    }
+    .upload-box p{margin:0;font-weight:600}
+    .upload-box small{display:block;color:var(--muted); margin-top:6px}
+
+    .controls{display:flex; gap:10px; margin-top:12px; align-items:center}
+    .btn{
+      padding:8px 12px;
+      border-radius:8px;
+      border:none;
+      background:var(--accent);
+      color:#fff;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(26,115,232,0.12)}
+
+    .preview{
+      display:flex;
+      gap:12px;
+      margin-top:14px;
+      align-items:center;
+    }
+    .preview img{width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e6e9ef}
+    .preview .meta{flex:1}
+    .progress{
+      height:10px;background:#eef2ff;border-radius:6px;overflow:hidden;margin-top:8px;
+    }
+    .progress > i{display:block;height:100%;width:0%;background:var(--accent);transition:width .2s ease}
+
+    /* Right: list */
+    .right{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      max-height:72vh;
+      overflow:auto;
+      padding:10px;
+    }
+    .item{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      border-radius:10px;
+      padding:8px;
+      border:1px solid #f1f3f6;
+      background:#fff;
+    }
+    .item img{width:84px;height:64px;object-fit:cover;border-radius:8px}
+    .item .info{flex:1}
+    .item .info small{display:block;color:var(--muted);font-size:12px}
+    .actions{display:flex; gap:8px; align-items:center}
+
+    .danger{background:var(--danger); color:#fff; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:600}
+
+    /* Responsive */
+    @media (max-width:940px){
+      .wrap{grid-template-columns:1fr; padding:10px}
+      .right{order:2}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+
+    <div class="panel" id="mainPanel">
+      <div>
+        <div class="title">
+          <div>
+            <h1>Admin Panel — Image Upload</h1>
+            <div class="subtitle">Upload images to Firebase Storage and manage them here.</div>
+          </div>
+          <div style="text-align:right;color:var(--muted);font-size:12px;">
+            <div id="stats">Loading…</div>
+          </div>
+        </div>
+
+        <!-- Upload area -->
+        <div id="uploadBox" class="upload-box" role="button" tabindex="0">
+          <p>Click to upload or drag & drop images here</p>
+          <small>PNG, JPG, WebP — max 5MB</small>
+        </div>
+
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
+
+        <!-- Preview -->
+        <div id="previewArea" style="display:none" class="preview">
+          <img id="previewImage" alt="preview">
+          <div class="meta">
+            <div id="fileName" style="font-weight:700"></div>
+            <small id="fileSize"></small>
+            <div class="progress" style="display:none"><i id="progressBar"></i></div>
+            <div class="controls">
+              <button id="uploadBtn" class="btn">Upload</button>
+              <button id="cancelBtn" class="btn ghost">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Success / single uploaded preview -->
+        <div id="uploadedNotice" style="display:none;margin-top:12px">
+          <h3 style="margin:0 0 8px 0;font-size:14px">Uploaded</h3>
+          <div style="display:flex;gap:10px;align-items:center">
+            <img id="uploadedThumb" alt="uploaded" style="width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e6e9ef;">
+            <div style="flex:1">
+              <input id="uploadedUrl" style="width:100%;padding:8px;border-radius:8px;border:1px solid #eef2f5" readonly>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right column: list of uploaded images -->
+    <div class="right">
+      <div class="panel" style="padding:12px">
+        <h3 style="margin:0 0 8px 0">Uploaded Images</h3>
+        <div style="color:var(--muted);font-size:13px;margin-bottom:8px">Manage uploads — auto-refreshes</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button id="refreshBtn" class="btn ghost" style="padding:7px 10px">Refresh</button>
+          <button id="clearAllBtn" class="danger" title="Delete all (storage + db)">Delete All</button>
+        </div>
+        <div class="list" id="uploadsList">Loading…</div>
+      </div>
+
+      <div class="panel" style="padding:12px">
+        <h3 style="margin:0 0 8px 0">Quick Tips</h3>
+        <ul style="color:var(--muted);margin:0;padding-left:18px;font-size:13px">
+          <li>Max 5MB per file. Allowed: PNG, JPG, WebP.</li>
+          <li>Delete removes both the Storage file and database record.</li>
+          <li>Make sure Firebase rules allow these operations for your admin use.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  /***************
+   * FIREBASE CONFIG
+   * Replace values if needed — I used your config.
+   ***************/
+  const firebaseConfig = {
+    apiKey: "AIzaSyAt8o7iIxPVH7xv8FWY82COtH9WCj5DOjs",
+    authDomain: "madara-web.firebaseapp.com",
+    databaseURL: "https://madara-web-default-rtdb.firebaseio.com",
+    projectId: "madara-web",
+    storageBucket: "madara-web.appspot.com",
+    messagingSenderId: "34918030636",
+    appId: "1:34918030636:web:bebec895d5c9d604346089"
+  };
+
+  // Initialize Firebase (compat)
+  firebase.initializeApp(firebaseConfig);
+  const storage = firebase.storage();
+  const db = firebase.database();
+
+  // UI elements
+  const uploadBox = document.getElementById('uploadBox');
+  const fileInput = document.getElementById('fileInput');
+  const previewArea = document.getElementById('previewArea');
+  const previewImage = document.getElementById('previewImage');
+  const fileNameEl = document.getElementById('fileName');
+  const fileSizeEl = document.getElementById('fileSize');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const progressBar = document.getElementById('progressBar');
+  const uploadedNotice = document.getElementById('uploadedNotice');
+  const uploadedThumb = document.getElementById('uploadedThumb');
+  const uploadedUrl = document.getElementById('uploadedUrl');
+  const uploadsList = document.getElementById('uploadsList');
+  const stats = document.getElementById('stats');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const clearAllBtn = document.getElementById('clearAllBtn');
+
+  let pendingFile = null;
+  let currentUploadTask = null;
+
+  // Helpers
+  function humanFileSize(bytes){
+    if (bytes === 0) return '0 B';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const sizes = ['B','KB','MB','GB','TB'];
+    return (bytes / Math.pow(1024,i)).toFixed(i ? 1 : 0) + ' ' + sizes[i];
+  }
+
+  // Click to open file chooser
+  uploadBox.addEventListener('click', () => fileInput.click());
+  uploadBox.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+
+  // Drag & drop visual
+  uploadBox.addEventListener('dragover', (e) => { e.preventDefault(); uploadBox.classList.add('dragover'); });
+  uploadBox.addEventListener('dragleave', () => uploadBox.classList.remove('dragover'));
+  uploadBox.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadBox.classList.remove('dragover');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) handleSelectedFile(f);
+  });
+
+  // File input change
+  fileInput.addEventListener('change', () => {
+    const f = fileInput.files && fileInput.files[0];
+    if (f) handleSelectedFile(f);
+  });
+
+  // Validate and preview
+  function handleSelectedFile(file){
+    // validate
+    const allowed = ['image/png','image/jpeg','image/webp'];
+    if (!allowed.includes(file.type)){
+      alert('Invalid file type. Allowed: PNG, JPG, WebP.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024){
+      alert('File too large. Max 5MB.');
+      return;
+    }
+
+    pendingFile = file;
+    // preview
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      previewImage.src = ev.target.result;
+      fileNameEl.textContent = file.name;
+      fileSizeEl.textContent = humanFileSize(file.size);
+      previewArea.style.display = 'flex';
+      uploadedNotice.style.display = 'none';
+      document.getElementById('uploadedUrl').value = '';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Cancel selected
+  cancelBtn.addEventListener('click', () => {
+    pendingFile = null;
+    previewArea.style.display = 'none';
+    fileInput.value = '';
+  });
+
+  // Upload
+  uploadBtn.addEventListener('click', () => {
+    if (!pendingFile) return alert('No file selected.');
+    startUpload(pendingFile);
+  });
+
+  function startUpload(file){
+    // Prepare path and ref
+    const path = 'admin_uploads/' + Date.now() + '_' + file.name.replace(/\s+/g,'_');
+    const ref = storage.ref(path);
+    const task = ref.put(file);
+    currentUploadTask = task;
+
+    // UI
+    document.querySelector('.progress').style.display = 'block';
+    progressBar.style.width = '0%';
+
+    task.on('state_changed',
+      (snapshot) => {
+        const percent = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        progressBar.style.width = percent + '%';
+      },
+      (err) => {
+        alert('Upload failed: ' + err.message);
+        document.querySelector('.progress').style.display = 'none';
+      },
+      async () => {
+        try {
+          const downloadURL = await task.snapshot.ref.getDownloadURL();
+          // Save to Realtime DB with the storage path so we can delete later
+          const newRef = db.ref('admin_uploads').push();
+          await newRef.set({
+            url: downloadURL,
+            path: path,
+            name: file.name,
+            size: file.size,
+            uploadedAt: Date.now()
+          });
+
+          // Update UI
+          uploadedThumb.src = downloadURL;
+          uploadedUrl.value = downloadURL;
+          uploadedNotice.style.display = 'block';
+          previewArea.style.display = 'none';
+          fileInput.value = '';
+          pendingFile = null;
+          document.querySelector('.progress').style.display = 'none';
+          progressBar.style.width = '0%';
+
+          // refresh list
+          loadUploads();
+
+        } catch (e){
+          alert('Error after upload: ' + e.message);
+        }
+      }
+    );
+  }
+
+  // Load uploads from DB
+  async function loadUploads(){
+    uploadsList.innerHTML = 'Loading…';
+    try{
+      const snap = await db.ref('admin_uploads').orderByChild('uploadedAt').once('value');
+      const val = snap.val() || {};
+      const entries = Object.entries(val).sort((a,b) => b[1].uploadedAt - a[1].uploadedAt);
+
+      // Update stats
+      stats.textContent = `${entries.length} images`;
+
+      if (entries.length === 0){
+        uploadsList.innerHTML = '<div style="color:var(--muted)">No uploads yet</div>';
+        return;
+      }
+
+      uploadsList.innerHTML = '';
+      for (const [key, data] of entries){
+        const el = document.createElement('div');
+        el.className = 'item';
+        el.innerHTML = `
+          <img src="${encodeURI(data.url)}" alt="${data.name}">
+          <div class="info">
+            <div style="font-weight:650">${escapeHtml(data.name || '—')}</div>
+            <small>${new Date(data.uploadedAt).toLocaleString()} • ${humanFileSize(data.size || 0)}</small>
+            <div style="margin-top:6px">
+              <input style="width:100%;padding:6px;border-radius:6px;border:1px solid #eef2f5;font-size:12px" value="${escapeHtml(data.url)}" readonly>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn" data-key="${key}" onclick="copyUrl(event)">Copy</button>
+            <button class="danger" data-key="${key}" onclick="deleteUpload(event)">Delete</button>
+          </div>
+        `;
+        uploadsList.appendChild(el);
+      }
+
+    }catch(err){
+      uploadsList.innerHTML = '<div style="color:var(--danger)">Failed to load: '+escapeHtml(err.message)+'</div>';
+    }
+  }
+
+  // Escape helper
+  function escapeHtml(s){
+    return String(s||'').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
+  }
+
+  // Copy URL
+  function copyUrl(e){
+    const key = e.currentTarget.getAttribute('data-key');
+    const input = e.currentTarget.closest('.item').querySelector('input');
+    input.select();
+    document.execCommand('copy');
+    e.currentTarget.textContent = 'Copied';
+    setTimeout(()=> e.currentTarget.textContent = 'Copy', 1200);
+  }
+
+  // Delete single upload (storage + db)
+  async function deleteUpload(e){
+    const key = e.currentTarget.getAttribute('data-key');
+    if (!key) return;
+    if (!confirm('Delete this image permanently from Storage and Database?')) return;
+
+    // Get DB record
+    try{
+      const snap = await db.ref('admin_uploads/' + key).once('value');
+      const data = snap.val();
+      if (!data) {
+        alert('Record not found.');
+        loadUploads();
+        return;
+      }
+      // Delete storage file if path exists
+      if (data.path){
+        try {
+          await storage.ref(data.path).delete();
+        } catch (sErr){
+          // Might already be gone — still try to delete DB
+          console.warn('Storage delete error:', sErr);
+        }
+      }
+      // Remove DB record
+      await db.ref('admin_uploads/' + key).remove();
+      loadUploads();
+    }catch(err){
+      alert('Delete failed: ' + err.message);
+    }
+  }
+
+  // Delete all uploads (danger)
+  clearAllBtn.addEventListener('click', async () => {
+    if (!confirm('DELETE ALL uploads permanently? This removes files from Storage and all DB entries.')) return;
+    clearAllBtn.disabled = true;
+    clearAllBtn.textContent = 'Deleting...';
+    try{
+      const snap = await db.ref('admin_uploads').once('value');
+      const data = snap.val() || {};
+      const keys = Object.keys(data);
+      for (const k of keys){
+        const rec = data[k];
+        if (rec && rec.path){
+          try { await storage.ref(rec.path).delete(); } catch(e){ console.warn('delete error', e); }
+        }
+        await db.ref('admin_uploads/' + k).remove();
+      }
+      loadUploads();
+    }catch(err){
+      alert('Clear all failed: ' + err.message);
+    }finally{
+      clearAllBtn.disabled = false;
+      clearAllBtn.textContent = 'Delete All';
+    }
+  });
+
+  // Refresh
+  refreshBtn.addEventListener('click', loadUploads);
+
+  // Auto-load on start and listen for db changes to update quickly
+  loadUploads();
+  db.ref('admin_uploads').on('value', loadUploads);
+
+  // Expose deleteUpload/copyUrl to inline onClick handlers
+  window.deleteUpload = deleteUpload;
+  window.copyUrl = copyUrl;
+
+</script>
+</body>
+</html>
