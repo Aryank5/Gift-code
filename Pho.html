@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screenshot Gallery</title>
+    <title>Firebase Screenshot Gallery</title>
     <style>
         * {
             margin: 0;
@@ -15,7 +15,8 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: #333;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
             padding: 20px;
         }
 
@@ -28,13 +29,17 @@
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            position: relative;
         }
 
         h1 {
             color: #2c3e50;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .stats {
@@ -45,12 +50,40 @@
             color: #666;
         }
 
+        .auth-section {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
         /* Upload Section */
         .upload-section {
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
 
@@ -105,6 +138,13 @@
             overflow: hidden;
             border: 1px solid #ddd;
             background: #f8f9fa;
+            position: relative;
+        }
+
+        .preview-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .upload-actions {
@@ -122,16 +162,40 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         button:hover:not(:disabled) {
             background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         button:disabled {
             background: #bdc3c7;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            padding: 8px 16px;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #c0392b;
         }
 
         .icon-btn {
@@ -145,6 +209,7 @@
             align-items: center;
             justify-content: center;
             font-size: 12px;
+            border: none;
         }
 
         .spinner {
@@ -167,7 +232,7 @@
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         #grid {
@@ -183,11 +248,13 @@
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: white;
         }
 
         .screenshot-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
         }
 
         .screenshot-card img {
@@ -222,6 +289,14 @@
             font-size: 11px;
         }
 
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+            grid-column: 1 / -1;
+        }
+
         /* Lightbox */
         #lightbox {
             position: fixed;
@@ -250,6 +325,7 @@
             max-width: 100%;
             max-height: 90vh;
             object-fit: contain;
+            border-radius: 8px;
         }
 
         .lightbox-nav {
@@ -262,26 +338,46 @@
             padding: 15px;
             cursor: pointer;
             font-size: 18px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-nav:hover {
+            background: rgba(0,0,0,0.7);
         }
 
         #lbPrev {
-            left: 10px;
+            left: 20px;
         }
 
         #lbNext {
-            right: 10px;
+            right: 20px;
         }
 
         #lbClose {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 20px;
+            right: 20px;
             background: rgba(0,0,0,0.5);
             color: white;
             border: none;
             padding: 10px;
             cursor: pointer;
             font-size: 18px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #lbClose:hover {
+            background: rgba(0,0,0,0.7);
         }
 
         /* Toast */
@@ -297,6 +393,7 @@
             transform: translateX(150%);
             transition: transform 0.3s ease;
             z-index: 1001;
+            max-width: 300px;
         }
 
         .toast.show {
@@ -312,7 +409,7 @@
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin-top: 20px;
         }
 
@@ -325,6 +422,21 @@
         /* Hidden file inputs */
         .hidden-input {
             display: none;
+        }
+
+        /* Search Section */
+        .search-section {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-section input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
         }
 
         /* Responsive */
@@ -344,16 +456,34 @@
             body {
                 padding: 10px;
             }
+            
+            .auth-section {
+                position: static;
+                margin-bottom: 15px;
+            }
+            
+            .utility-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🎮 Winning Screenshots Gallery</h1>
+            <h1>📸 Firebase Screenshot Gallery</h1>
             <div class="stats">
                 <span>Shown: <span id="shownCount">0</span></span>
                 <span>Total: <span id="totalCount">0</span></span>
+            </div>
+            <div id="authSection" class="auth-section">
+                <div class="user-info">
+                    <div class="user-avatar">G</div>
+                    <span>Guest User</span>
+                    <button id="googleSignIn" class="btn-secondary">
+                        Sign in with Google
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -386,12 +516,19 @@
         </section>
 
         <section class="gallery-section">
-            <div id="grid" class="screenshot-grid"></div>
+            <div class="search-section">
+                <input type="text" id="searchInput" placeholder="Search images by name...">
+                <button id="clearSearch">Clear</button>
+            </div>
+            
+            <div id="grid" class="screenshot-grid">
+                <div class="empty-state">Please sign in to view and upload screenshots</div>
+            </div>
             
             <div style="text-align: center;">
                 <button id="loadMore">
-                    <span id="btnText">Load More</span>
-                    <div id="spinner" class="spinner" style="display: none;"></div>
+                    <span>Load More</span>
+                    <div id="loadMoreSpinner" class="spinner" style="display: none;"></div>
                 </button>
             </div>
         </section>
@@ -400,7 +537,7 @@
             <h3 style="margin-bottom: 15px;">Data Management</h3>
             <div class="utility-buttons">
                 <button id="exportBtn">📤 Export Backup</button>
-                <button id="clearBtn">🗑️ Clear All</button>
+                <button id="clearBtn" class="btn-danger">🗑️ Clear All</button>
                 <input type="file" id="importInput" accept=".json" class="hidden-input">
                 <button onclick="document.getElementById('importInput').click()">📥 Import Backup</button>
             </div>
@@ -420,53 +557,72 @@
     <!-- Toast -->
     <div id="toast" class="toast"></div>
 
-    <script>
-        // Your JavaScript code goes here
-        // (The complete JS code you provided)
-    
-            /* ========== Configuration ========== */
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-        const ALLOWED_TYPES = ['image/png','image/jpeg','image/webp'];
-        const STORAGE_KEY = 'winning_screenshots_v1';
-        const PAGE_SIZE = 30; // shown per "page"
-        let pageIndex = 0; // for load more
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            getDocs, 
+            doc, 
+            deleteDoc, 
+            query, 
+            orderBy, 
+            limit,
+            startAfter,
+            getCountFromServer,
+            where
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+        import { 
+            getStorage, 
+            ref, 
+            uploadBytes, 
+            getDownloadURL, 
+            deleteObject 
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js';
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            signInAnonymously,
+            signInWithPopup,
+            GoogleAuthProvider,
+            signOut
+        } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
-        /* ========== Helpers ========== */
+        // Firebase configuration - Replace with your actual config
+        const firebaseConfig = {
+                apiKey: "AIzaSyAt8o7iIxPVH7xv8FWY82COtH9WCj5DOjs",
+    authDomain: "madara-web.firebaseapp.com",
+    databaseURL: "https://madara-web-default-rtdb.firebaseio.com",
+    projectId: "madara-web",
+    storageBucket: "madara-web.firebasestorage.app",
+    messagingSenderId: "34918030636",
+    appId: "1:34918030636:web:bebec895d5c9d604346089"
+  };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Collections
+        const SCREENSHOTS_COLLECTION = 'screenshots';
+
+        // Global variables
+        let currentUser = null;
+        let lastVisible = null;
+        let isAnonymousUser = false;
+        let currentScreenshots = [];
+        let staging = [];
+        const PAGE_SIZE = 12;
+        let pageIndex = 0;
+
+        /* ========== DOM Elements ========== */
         const $ = sel => document.querySelector(sel);
-        const qs = sel => Array.from(document.querySelectorAll(sel));
-        const toastEl = $('#toast');
-
-        function showToast(message, type='success', ms=3000){
-            toastEl.textContent = message;
-            toastEl.className = 'toast ' + (type==='error' ? 'error' : 'success') + ' show';
-            setTimeout(()=>{toastEl.className = 'toast';}, ms);
-        }
-
-        /* ========== Local Storage model ==========
-        We store an array of items:
-        [{ id, name, size, type, dataUrl, ts }]
-        ==========================================*/
-        function loadStore(){
-            try{
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if(!raw) return [];
-                return JSON.parse(raw);
-            }catch(e){
-                console.warn('Failed parse store', e);
-                return [];
-            }
-        }
-        function saveStore(arr){
-            try{
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-                return true;
-            }catch(e){
-                console.error('saveStore error', e);
-                return false;
-            }
-        }
-
-        /* ========== UI elements ========== */
         const uploadBox = $('#uploadBox');
         const fileInput = $('#fileInput');
         const previewRow = $('#previewRow');
@@ -474,6 +630,7 @@
         const grid = $('#grid');
         const loadMoreBtn = $('#loadMore');
         const spinner = $('#spinner');
+        const loadMoreSpinner = $('#loadMoreSpinner');
         const shownCountEl = $('#shownCount');
         const totalCountEl = $('#totalCount');
         const btnText = $('#btnText');
@@ -481,232 +638,11 @@
         const exportBtn = $('#exportBtn');
         const importInput = $('#importInput');
         const clearBtn = $('#clearBtn');
-        const previewSmall = $('#smallPreview');
-
-        /* upload staging */
-        let staging = []; // files selected but not yet uploaded
-
-        /* ========== Drag & drop & file selection ========== */
-        function preventDefaults(e){e.preventDefault();e.stopPropagation();}
-        ['dragenter','dragover','dragleave','drop'].forEach(evt=>uploadBox.addEventListener(evt,preventDefaults));
-        ['dragenter','dragover'].forEach(evt=>{
-            uploadBox.addEventListener(evt,()=>uploadBox.classList.add('dragover'));
-        });
-        ['dragleave','drop'].forEach(evt=>{
-            uploadBox.addEventListener(evt,()=>uploadBox.classList.remove('dragover'));
-        });
-        uploadBox.addEventListener('drop',(e)=>{
-            const dt = e.dataTransfer;
-            const files = Array.from(dt.files || []);
-            handleFiles(files);
-        });
-        uploadBox.addEventListener('click',()=>fileInput.click());
-        fileInput.addEventListener('change',e=>{
-            const files = Array.from(e.target.files || []);
-            handleFiles(files);
-        });
-
-        /* allow keyboard activation */
-        uploadBox.addEventListener('keydown', e=>{
-            if(e.key==='Enter' || e.key===' ') fileInput.click();
-        });
-
-        /* ========== File processing ========== */
-        function handleFiles(files){
-            let added = 0;
-            files.forEach(file=>{
-                if(!ALLOWED_TYPES.includes(file.type)){
-                    showToast('Unsupported file type: ' + file.name, 'error', 3500);
-                    return;
-                }
-                if(file.size > MAX_FILE_SIZE){
-                    showToast('File too large: ' + file.name, 'error', 3500);
-                    return;
-                }
-                // read preview only
-                const reader = new FileReader();
-                reader.onload = ev=>{
-                    staging.push({name:file.name,size:file.size,type:file.type,dataUrl:ev.target.result});
-                    renderStaging();
-                };
-                reader.readAsDataURL(file);
-                added++;
-            });
-            if(added) showToast(`${added} file(s) ready to upload`);
-        }
-
-        function renderStaging(){
-            previewRow.innerHTML = '';
-            smallPreview.innerHTML = '';
-            staging.forEach((item, idx)=>{
-                const thumb = document.createElement('div');
-                thumb.className = 'preview-thumb';
-                thumb.title = item.name;
-                thumb.innerHTML = `<img src="${item.dataUrl}" style="width:100%;height:100%;object-fit:cover">`;
-                // add little remove button overlay
-                const rem = document.createElement('button');
-                rem.className = 'icon-btn';
-                rem.style.position='absolute';
-                rem.style.marginLeft='6px';
-                rem.style.marginTop='6px';
-                rem.title='Remove';
-                rem.innerText='✕';
-                rem.onclick = (e)=>{
-                    e.stopPropagation();
-                    staging.splice(idx,1);
-                    renderStaging();
-                };
-                const container = document.createElement('div');
-                container.style.position='relative';
-                container.appendChild(thumb);
-                container.appendChild(rem);
-                previewRow.appendChild(container);
-
-                // small preview on right
-                const s = document.createElement('div');
-                s.className='preview-thumb';
-                s.style.width='56px'; s.style.height='56px';
-                s.innerHTML = `<img src="${item.dataUrl}" style="width:100%;height:100%;object-fit:cover">`;
-                smallPreview.appendChild(s);
-            });
-
-            uploadBtn.disabled = staging.length === 0;
-        }
-
-        /* ========== Upload (save to localStorage) ========== */
-        uploadBtn.addEventListener('click', async ()=>{
-            if(staging.length===0) return;
-            uploadBtn.disabled = true;
-            spinner.style.display = 'inline-block';
-            btnText.textContent = 'Uploading...';
-            // simulate processing — but we must actually save
-            try{
-                const store = loadStore();
-                let added = 0;
-                for(const item of staging){
-                    // create id and timestamp
-                    const id = 'img_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
-                    const entry = {
-                        id, name: item.name, size: item.size, type: item.type,
-                        dataUrl: item.dataUrl,
-                        ts: new Date().toISOString()
-                    };
-                    store.unshift(entry); // newest first
-                    added++;
-                }
-                const ok = saveStore(store);
-                if(!ok){
-                    showToast('Failed to save: storage might be full. Export and use server storage.', 'error', 5000);
-                } else {
-                    showToast(added + ' image(s) uploaded');
-                    staging = [];
-                    renderStaging();
-                    // refresh grid and reset pagination to show newest
-                    pageIndex = 0;
-                    renderGrid(true);
-                }
-            }catch(err){
-                console.error(err);
-                showToast('Upload error', 'error');
-            }finally{
-                uploadBtn.disabled = false;
-                spinner.style.display = 'none';
-                btnText.textContent = 'Load More';
-            }
-        });
-
-        /* ========== Grid rendering & pagination ========== */
-        function formatTs(iso){
-            try{
-                const d = new Date(iso);
-                return d.toLocaleString();
-            }catch(e){
-                return iso;
-            }
-        }
-
-        function renderGrid(reset=false){
-            const store = loadStore();
-            totalCountEl.textContent = store.length;
-            if(reset){
-                grid.innerHTML = '';
-                pageIndex = 0;
-            }
-            // the gallery shows PAGE_SIZE items per page
-            const start = pageIndex * PAGE_SIZE;
-            const slice = store.slice(start, start + PAGE_SIZE);
-            slice.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'screenshot-card';
-                card.setAttribute('data-id', item.id);
-                card.innerHTML = `
-                    <img src="${item.dataUrl}" alt="${escapeHtml(item.name)}">
-                    <div class="card-actions">
-                        <button class="icon-btn view-btn" title="View">🔍</button>
-                        <button class="icon-btn del-btn" title="Delete">🗑</button>
-                    </div>
-                    <div class="timestamp">${formatTs(item.ts)}</div>
-                `;
-                // view
-                card.querySelector('.view-btn').addEventListener('click', ()=>openLightbox(item.id));
-                // delete
-                card.querySelector('.del-btn').addEventListener('click', (e)=>{
-                    e.stopPropagation();
-                    if(!confirm('Delete this image?')) return;
-                    deleteImageById(item.id);
-                });
-                // clicking anywhere opens lightbox
-                card.addEventListener('click', (e)=>{
-                    if(e.target.closest('.del-btn')) return;
-                    openLightbox(item.id);
-                });
-                grid.appendChild(card);
-            });
-
-            // update shown count
-            const shown = Math.min((pageIndex+1)*PAGE_SIZE, store.length);
-            shownCountEl.textContent = shown;
-            totalCountEl.textContent = store.length;
-
-            // disable load more if none left
-            if((pageIndex+1)*PAGE_SIZE >= store.length) {
-                loadMoreBtn.disabled = true;
-                btnText.textContent = 'All Loaded';
-            } else {
-                loadMoreBtn.disabled = false;
-                btnText.textContent = 'Load More';
-            }
-        }
-
-        loadMoreBtn.addEventListener('click', ()=>{
-            // load next page
-            pageIndex++;
-            // show spinner briefly
-            spinner.style.display = 'inline-block';
-            loadMoreBtn.disabled = true;
-            setTimeout(()=>{
-                renderGrid();
-                spinner.style.display = 'none';
-            }, 350);
-        });
-
-        /* delete helper */
-        function deleteImageById(id){
-            const store = loadStore();
-            const idx = store.findIndex(x=>x.id===id);
-            if(idx===-1){ showToast('Image not found', 'error'); return; }
-            store.splice(idx,1);
-            const ok = saveStore(store);
-            if(ok){
-                showToast('Deleted');
-                // re-render the gallery
-                pageIndex = 0;
-                renderGrid(true);
-            } else {
-                showToast('Failed to delete', 'error');
-            }
-        }
-        /* ========== Lightbox (fullscreen preview) ========== */
+        const authSection = $('#authSection');
+        const googleSignInBtn = $('#googleSignIn');
+        const searchInput = $('#searchInput');
+        const clearSearchBtn = $('#clearSearch');
+        const toastEl = $('#toast');
         const lightbox = $('#lightbox');
         const lbImage = $('#lbImage');
         const lbClose = $('#lbClose');
@@ -714,162 +650,694 @@
         const lbNext = $('#lbNext');
         let currentLightboxIndex = -1;
 
-        function openLightbox(id){
-            const store = loadStore();
-            const idx = store.findIndex(x=>x.id===id);
-            if(idx===-1) return;
+        /* ========== Helper Functions ========== */
+        function showToast(message, type = 'success', ms = 3000) {
+            toastEl.textContent = message;
+            toastEl.className = 'toast ' + (type === 'error' ? 'error' : 'success') + ' show';
+            setTimeout(() => { toastEl.className = 'toast'; }, ms);
+        }
+
+        function formatTs(iso) {
+            try {
+                const d = new Date(iso);
+                return d.toLocaleString();
+            } catch (e) {
+                return iso;
+            }
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        /* ========== Authentication ========== */
+        async function initAuth() {
+            try {
+                // Try to sign in anonymously first
+                const userCredential = await signInAnonymously(auth);
+                currentUser = userCredential.user;
+                isAnonymousUser = true;
+                console.log('Signed in anonymously:', currentUser.uid);
+                
+                updateAuthUI();
+                
+            } catch (error) {
+                console.error('Authentication failed:', error);
+                showToast('Authentication failed. Some features may not work.', 'error');
+            }
+        }
+
+        async function signInWithGoogle() {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                currentUser = result.user;
+                isAnonymousUser = false;
+                showToast(`Welcome, ${currentUser.displayName || 'User'}!`);
+                updateAuthUI();
+                
+            } catch (error) {
+                console.error('Google sign-in failed:', error);
+                showToast('Google sign-in failed', 'error');
+            }
+        }
+
+        async function signOutUser() {
+            try {
+                await signOut(auth);
+                currentUser = null;
+                showToast('Signed out');
+                updateAuthUI();
+                grid.innerHTML = '<div class="empty-state">Please sign in to view and upload screenshots</div>';
+            } catch (error) {
+                console.error('Sign out failed:', error);
+            }
+        }
+
+        function updateAuthUI() {
+            if (currentUser) {
+                const displayName = isAnonymousUser ? 'Guest' : (currentUser.displayName || 'User');
+                const initial = displayName.charAt(0).toUpperCase();
+                
+                authSection.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">${initial}</div>
+                        <span>${displayName}</span>
+                        ${isAnonymousUser ? 
+                            `<button id="upgradeBtn" class="btn-secondary">Upgrade to Google</button>` : 
+                            `<button id="signOutBtn" class="btn-secondary">Sign Out</button>`
+                        }
+                    </div>
+                `;
+                
+                if (isAnonymousUser) {
+                    $('#upgradeBtn').addEventListener('click', signInWithGoogle);
+                } else {
+                    $('#signOutBtn').addEventListener('click', signOutUser);
+                }
+            } else {
+                authSection.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">G</div>
+                        <span>Guest User</span>
+                        <button id="googleSignIn" class="btn-secondary">
+                            Sign in with Google
+                        </button>
+                    </div>
+                `;
+                $('#googleSignIn').addEventListener('click', signInWithGoogle);
+            }
+        }
+
+        /* ========== File Handling ========== */
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => uploadBox.addEventListener(evt, preventDefaults));
+        ['dragenter', 'dragover'].forEach(evt => {
+            uploadBox.addEventListener(evt, () => uploadBox.classList.add('dragover'));
+        });
+        ['dragleave', 'drop'].forEach(evt => {
+            uploadBox.addEventListener(evt, () => uploadBox.classList.remove('dragover'));
+        });
+
+        uploadBox.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = Array.from(dt.files || []);
+            handleFiles(files);
+        });
+
+        uploadBox.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', e => {
+            const files = Array.from(e.target.files || []);
+            handleFiles(files);
+        });
+
+        uploadBox.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileInput.click();
+            }
+        });
+
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+
+        function handleFiles(files) {
+            if (!currentUser) {
+                showToast('Please sign in to upload images', 'error');
+                return;
+            }
+
+            let added = 0;
+            let errors = [];
+            
+            files.forEach(file => {
+                if (!ALLOWED_TYPES.includes(file.type)) {
+                    errors.push('Unsupported file type: ' + file.name);
+                    return;
+                }
+                if (file.size > MAX_FILE_SIZE) {
+                    errors.push('File too large: ' + file.name);
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    staging.push({ 
+                        name: file.name, 
+                        size: file.size, 
+                        type: file.type, 
+                        dataUrl: ev.target.result 
+                    });
+                    renderStaging();
+                };
+                reader.onerror = () => {
+                    showToast('Failed to read file: ' + file.name, 'error', 3500);
+                };
+                reader.readAsDataURL(file);
+                added++;
+            });
+            
+            if (errors.length > 0) {
+                showToast(errors.slice(0, 3).join(', ') + (errors.length > 3 ? '...' : ''), 'error', 5000);
+            }
+            if (added) showToast(`${added} file(s) ready to upload`);
+        }
+
+        function renderStaging() {
+            previewRow.innerHTML = '';
+            smallPreview.innerHTML = '';
+            
+            staging.forEach((item, idx) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'preview-thumb';
+                thumb.title = item.name;
+                thumb.innerHTML = `<img src="${item.dataUrl}" alt="${escapeHtml(item.name)}" style="width:100%;height:100%;object-fit:cover">`;
+                
+                const rem = document.createElement('button');
+                rem.className = 'icon-btn';
+                rem.style.position = 'absolute';
+                rem.style.top = '6px';
+                rem.style.left = '6px';
+                rem.title = 'Remove';
+                rem.innerHTML = '✕';
+                rem.onclick = (e) => {
+                    e.stopPropagation();
+                    staging.splice(idx, 1);
+                    renderStaging();
+                };
+                
+                const container = document.createElement('div');
+                container.style.position = 'relative';
+                container.style.display = 'inline-block';
+                container.appendChild(thumb);
+                container.appendChild(rem);
+                previewRow.appendChild(container);
+
+                const s = document.createElement('div');
+                s.className = 'preview-thumb';
+                s.style.width = '56px';
+                s.style.height = '56px';
+                s.innerHTML = `<img src="${item.dataUrl}" alt="${escapeHtml(item.name)}" style="width:100%;height:100%;object-fit:cover">`;
+                smallPreview.appendChild(s);
+            });
+
+            uploadBtn.disabled = staging.length === 0 || !currentUser;
+        }
+
+        /* ========== Firebase Operations ========== */
+        async function uploadToFirebase(file) {
+            if (!currentUser) {
+                throw new Error('Not authenticated');
+            }
+
+            try {
+                const timestamp = Date.now();
+                const fileExtension = file.name.split('.').pop();
+                const fileName = `screenshots/${currentUser.uid}/${timestamp}.${fileExtension}`;
+                
+                const storageRef = ref(storage, fileName);
+                const snapshot = await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(storageRef);
+                
+                const docRef = await addDoc(collection(db, SCREENSHOTS_COLLECTION), {
+                    userId: currentUser.uid,
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    storagePath: fileName,
+                    downloadURL: downloadURL,
+                    timestamp: new Date().toISOString(),
+                    createdAt: new Date()
+                });
+                
+                return { id: docRef.id, downloadURL };
+                
+            } catch (error) {
+                console.error('Upload failed:', error);
+                throw error;
+            }
+        }
+
+        async function getScreenshots(loadMore = false, searchTerm = '') {
+            if (!currentUser) return [];
+            
+            try {
+                let q;
+                const constraints = [where('userId', '==', currentUser.uid), orderBy('createdAt', 'desc')];
+                
+                if (searchTerm) {
+                    // Note: Firestore doesn't support native text search, so we do client-side filtering
+                    constraints.push(limit(100)); // Get more for client-side filtering
+                } else if (loadMore && lastVisible) {
+                    constraints.push(startAfter(lastVisible));
+                    constraints.push(limit(PAGE_SIZE));
+                } else {
+                    constraints.push(limit(PAGE_SIZE));
+                }
+                
+                q = query(collection(db, SCREENSHOTS_COLLECTION), ...constraints);
+                const querySnapshot = await getDocs(q);
+                let screenshots = [];
+                
+                lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+                
+                querySnapshot.forEach((doc) => {
+                    screenshots.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                // Client-side search filtering
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    screenshots = screenshots.filter(item => 
+                        item.name.toLowerCase().includes(term)
+                    );
+                    // Apply pagination after filtering
+                    screenshots = screenshots.slice(0, (pageIndex + 1) * PAGE_SIZE);
+                }
+                
+                return screenshots;
+                
+            } catch (error) {
+                console.error('Error getting screenshots:', error);
+                throw error;
+            }
+        }
+
+        async function getTotalCount() {
+            if (!currentUser) return 0;
+            
+            try {
+                const q = query(collection(db, SCREENSHOTS_COLLECTION), where('userId', '==', currentUser.uid));
+                const snapshot = await getCountFromServer(q);
+                return snapshot.data().count;
+            } catch (error) {
+                console.error('Error getting count:', error);
+                return 0;
+            }
+        }
+
+        async function deleteScreenshot(screenshotId, storagePath) {
+            if (!currentUser) {
+                throw new Error('Not authenticated');
+            }
+            
+            try {
+                await deleteDoc(doc(db, SCREENSHOTS_COLLECTION, screenshotId));
+                const storageRef = ref(storage, storagePath);
+                await deleteObject(storageRef);
+                
+                console.log('Screenshot deleted successfully');
+                
+            } catch (error) {
+                console.error('Error deleting screenshot:', error);
+                throw error;
+            }
+        }
+
+        /* ========== Upload to Firebase ========== */
+        uploadBtn.addEventListener('click', async () => {
+            if (staging.length === 0 || !currentUser) return;
+            
+            uploadBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Uploading...';
+
+            try {
+                let successCount = 0;
+                let errorCount = 0;
+                
+                for (const item of staging) {
+                    try {
+                        const response = await fetch(item.dataUrl);
+                        const blob = await response.blob();
+                        const file = new File([blob], item.name, { type: item.type });
+                        
+                        await uploadToFirebase(file);
+                        successCount++;
+                        
+                    } catch (error) {
+                        console.error(`Failed to upload ${item.name}:`, error);
+                        errorCount++;
+                    }
+                }
+                
+                if (successCount > 0) {
+                    showToast(`Successfully uploaded ${successCount} image(s)`);
+                    staging = [];
+                    renderStaging();
+                    pageIndex = 0;
+                    lastVisible = null;
+                    await renderGrid(true);
+                }
+                
+                if (errorCount > 0) {
+                    showToast(`Failed to upload ${errorCount} image(s)`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Upload process failed:', error);
+                showToast('Upload process failed', 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Upload';
+            }
+        });
+
+        /* ========== Gallery Rendering ========== */
+        async function renderGrid(reset = false) {
+            if (!currentUser) {
+                showToast('Please sign in to view images', 'error');
+                return;
+            }
+            
+            try {
+                const searchTerm = searchInput.value.trim();
+                
+                if (reset) {
+                    grid.innerHTML = '';
+                    pageIndex = 0;
+                    lastVisible = null;
+                }
+                
+                const screenshots = await getScreenshots(!reset, searchTerm);
+                currentScreenshots = screenshots; // Store for lightbox
+                
+                if (screenshots.length === 0 && reset) {
+                    grid.innerHTML = '<div class="empty-state">No screenshots yet. Upload some images to get started!</div>';
+                    shownCountEl.textContent = '0';
+                    totalCountEl.textContent = '0';
+                    return;
+                }
+                
+                screenshots.forEach(item => {
+                    const card = createScreenshotCard(item);
+                    grid.appendChild(card);
+                });
+                
+                const totalCount = searchTerm ? screenshots.length : await getTotalCount();
+                const shownCount = Math.min((pageIndex + 1) * PAGE_SIZE, totalCount);
+                
+                shownCountEl.textContent = shownCount;
+                totalCountEl.textContent = totalCount;
+                
+                loadMoreBtn.disabled = screenshots.length < PAGE_SIZE || !!searchTerm;
+                loadMoreBtn.innerHTML = loadMoreBtn.disabled ? 
+                    '<span>All Loaded</span>' : 
+                    '<span>Load More</span><div id="loadMoreSpinner" class="spinner" style="display: none;"></div>';
+                
+                updateSmallPreview(screenshots.slice(0, 6));
+                
+            } catch (error) {
+                console.error('Error rendering grid:', error);
+                showToast('Failed to load images', 'error');
+            }
+        }
+
+        function createScreenshotCard(item) {
+            const card = document.createElement('div');
+            card.className = 'screenshot-card';
+            card.setAttribute('data-id', item.id);
+            card.innerHTML = `
+                <img src="${item.downloadURL}" alt="${escapeHtml(item.name)}" loading="lazy">
+                <div class="card-actions">
+                    <button class="icon-btn view-btn" title="View">🔍</button>
+                    <button class="icon-btn del-btn" title="Delete">🗑</button>
+                </div>
+                <div class="timestamp">${formatTs(item.timestamp)}</div>
+            `;
+            
+            card.querySelector('.view-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                openLightbox(item);
+            });
+            
+            card.querySelector('.del-btn').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (!confirm('Delete this image?')) return;
+                
+                try {
+                    await deleteScreenshot(item.id, item.storagePath);
+                    showToast('Image deleted');
+                    card.remove();
+                    const totalCount = await getTotalCount();
+                    totalCountEl.textContent = totalCount;
+                } catch (error) {
+                    console.error('Delete failed:', error);
+                    showToast('Failed to delete image', 'error');
+                }
+            });
+            
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.del-btn')) return;
+                openLightbox(item);
+            });
+            
+            return card;
+        }
+
+        function updateSmallPreview(screenshots) {
+            smallPreview.innerHTML = '';
+            
+            screenshots.forEach(item => {
+                const s = document.createElement('div');
+                s.className = 'preview-thumb';
+                s.style.width = '56px';
+                s.style.height = '56px';
+                s.innerHTML = `<img src="${item.downloadURL}" alt="${escapeHtml(item.name)}" style="width:100%;height:100%;object-fit:cover">`;
+                smallPreview.appendChild(s);
+            });
+        }
+
+        loadMoreBtn.addEventListener('click', async () => {
+            pageIndex++;
+            loadMoreBtn.disabled = true;
+            loadMoreSpinner.style.display = 'inline-block';
+            
+            try {
+                await renderGrid();
+            } finally {
+                loadMoreSpinner.style.display = 'none';
+            }
+        });
+
+        /* ========== Search Functionality ========== */
+        searchInput.addEventListener('input', debounce((e) => {
+            pageIndex = 0;
+            lastVisible = null;
+            renderGrid(true);
+        }, 500));
+
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            pageIndex = 0;
+            lastVisible = null;
+            renderGrid(true);
+        });
+
+        /* ========== Lightbox ========== */
+        function openLightbox(item) {
+            const idx = currentScreenshots.findIndex(x => x.id === item.id);
+            if (idx === -1) return;
+            
             currentLightboxIndex = idx;
             showLBForIndex(idx);
             lightbox.classList.add('show');
-            lightbox.setAttribute('aria-hidden','false');
+            lightbox.setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
         }
 
-        function showLBForIndex(idx){
-            const store = loadStore();
-            if(idx < 0 || idx >= store.length) return;
-            const item = store[idx];
-            lbImage.src = item.dataUrl;
+        function showLBForIndex(idx) {
+            if (idx < 0 || idx >= currentScreenshots.length) return;
+            
+            const item = currentScreenshots[idx];
+            lbImage.src = item.downloadURL;
             lbImage.alt = item.name;
         }
 
-        function closeLightbox(){
+        function closeLightbox() {
             lightbox.classList.remove('show');
-            lightbox.setAttribute('aria-hidden','true');
+            lightbox.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
         }
 
         lbClose.addEventListener('click', closeLightbox);
-        lightbox.addEventListener('click', (e)=>{
-            if(e.target === lightbox) closeLightbox();
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
         });
-        lbPrev.addEventListener('click', ()=>{
-            const store = loadStore();
-            if(store.length===0) return;
-            currentLightboxIndex = (currentLightboxIndex - 1 + store.length) % store.length;
-            showLBForIndex(currentLightboxIndex);
-        });
-        lbNext.addEventListener('click', ()=>{
-            const store = loadStore();
-            if(store.length===0) return;
-            currentLightboxIndex = (currentLightboxIndex + 1) % store.length;
+
+        lbPrev.addEventListener('click', () => {
+            if (currentScreenshots.length === 0) return;
+            currentLightboxIndex = (currentLightboxIndex - 1 + currentScreenshots.length) % currentScreenshots.length;
             showLBForIndex(currentLightboxIndex);
         });
 
-        /* keyboard navigation for lightbox and general */
-        document.addEventListener('keydown',(e)=>{
-            if(lightbox.classList.contains('show')){
-                if(e.key==='Escape') closeLightbox();
-                if(e.key==='ArrowLeft') lbPrev.click();
-                if(e.key==='ArrowRight') lbNext.click();
+        lbNext.addEventListener('click', () => {
+            if (currentScreenshots.length === 0) return;
+            currentLightboxIndex = (currentLightboxIndex + 1) % currentScreenshots.length;
+            showLBForIndex(currentLightboxIndex);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('show')) {
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowLeft') lbPrev.click();
+                if (e.key === 'ArrowRight') lbNext.click();
             }
         });
 
-        /* ========== Export / Import / Clear ========== */
-        exportBtn.addEventListener('click', ()=>{
-            const data = localStorage.getItem(STORAGE_KEY) || '[]';
-            const blob = new Blob([data], {type:'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'winning_screenshots_backup.json';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-            showToast('Export started');
-        });
-
-        importInput.addEventListener('change', ()=>{
-            const file = importInput.files[0];
-            if(!file) return;
-            if(file.type !== 'application/json' && !file.name.endsWith('.json')){
-                showToast('Please select a JSON file', 'error');
+        /* ========== Export/Import ========== */
+        exportBtn.addEventListener('click', async () => {
+            if (!currentUser) {
+                showToast('Please sign in to export data', 'error');
                 return;
             }
-            const reader = new FileReader();
-            reader.onload = e=>{
-                try{
-                    const arr = JSON.parse(e.target.result);
-                    if(!Array.isArray(arr)){
-                        showToast('Invalid backup file', 'error');
-                        return;
-                    }
-                    // Replace or merge? We'll merge unique ids to existing store
-                    const store = loadStore();
-                    const existingIds = new Set(store.map(s=>s.id));
-                    let added = 0;
-                    arr.forEach(item=>{
-                        if(!item.id) return;
-                        if(existingIds.has(item.id)) return;
-                        store.push(item); added++;
+            
+            try {
+                const q = query(
+                    collection(db, SCREENSHOTS_COLLECTION),
+                    where('userId', '==', currentUser.uid),
+                    orderBy('createdAt', 'desc')
+                );
+                const querySnapshot = await getDocs(q);
+                const exportData = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    exportData.push({
+                        id: doc.id,
+                        name: data.name,
+                        size: data.size,
+                        type: data.type,
+                        downloadURL: data.downloadURL,
+                        timestamp: data.timestamp
                     });
-                    saveStore(store);
-                    showToast('Imported ' + added + ' images');
-                    pageIndex = 0;
+                });
+                
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `screenshots_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                
+                showToast('Export completed');
+                
+            } catch (error) {
+                console.error('Export failed:', error);
+                showToast('Export failed', 'error');
+            }
+        });
+
+        clearBtn.addEventListener('click', async () => {
+            if (!currentUser) {
+                showToast('Please sign in to clear data', 'error');
+                return;
+            }
+            
+            if (!confirm('Clear ALL your images? This cannot be undone.')) return;
+            if (!confirm('Are you absolutely sure? This will delete all your screenshots permanently.')) return;
+            
+            try {
+                const q = query(
+                    collection(db, SCREENSHOTS_COLLECTION),
+                    where('userId', '==', currentUser.uid)
+                );
+                const querySnapshot = await getDocs(q);
+                let deletedCount = 0;
+                
+                for (const doc of querySnapshot.docs) {
+                    const data = doc.data();
+                    await deleteDoc(doc.ref);
+                    
+                    if (data.storagePath) {
+                        try {
+                            const storageRef = ref(storage, data.storagePath);
+                            await deleteObject(storageRef);
+                        } catch (storageError) {
+                            console.warn('Could not delete from storage:', storageError);
+                        }
+                    }
+                    
+                    deletedCount++;
+                }
+                
+                showToast(`Cleared ${deletedCount} images`);
+                pageIndex = 0;
+                lastVisible = null;
+                await renderGrid(true);
+                
+            } catch (error) {
+                console.error('Clear failed:', error);
+                showToast('Failed to clear images', 'error');
+            }
+        });
+
+        /* ========== Initialization ========== */
+        async function init() {
+            await initAuth();
+            
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    isAnonymousUser = user.isAnonymous;
+                    console.log('User detected:', user.uid);
                     renderGrid(true);
-                }catch(err){
-                    console.error(err);
-                    showToast('Failed to import', 'error');
+                } else {
+                    currentUser = null;
+                    console.log('No user signed in');
+                    grid.innerHTML = '<div class="empty-state">Please sign in to view and upload screenshots</div>';
                 }
-            };
-            reader.readAsText(file);
-        });
-
-        clearBtn.addEventListener('click', ()=>{
-            if(!confirm('Clear ALL images from localStorage? This cannot be undone unless you exported a backup.')) return;
-            localStorage.removeItem(STORAGE_KEY);
-            showToast('Cleared');
-            pageIndex = 0;
-            renderGrid(true);
-        });
-
-        /* ========== Utils ========== */
-        function escapeHtml(s){
-            return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+                updateAuthUI();
+                renderStaging(); // Update upload button state
+            });
+            
+            if (currentUser) {
+                await renderGrid(true);
+            }
         }
 
-        /* ========== Init: render existing store ========= */
-        (function init(){
-            // For demo, if localStorage empty, seed a few placeholders? We'll keep empty.
-            renderGrid(true);
-            // small preview initial
-            const store = loadStore();
-            if(store.length){
-                smallPreview.innerHTML = '';
-                for(let i=0;i<Math.min(6,store.length);i++){
-                    const s = document.createElement('div');
-                    s.className='preview-thumb';
-                    s.style.width='56px'; s.style.height='56px';
-                    s.innerHTML = `<img src="${store[i].dataUrl}" style="width:100%;height:100%;object-fit:cover">`;
-                    smallPreview.appendChild(s);
-                }
-            }
-        })();
-
-        /* ========== Storage quota check (best-effort) =========*/
-        function estimateLocalStorageUsage(){
-            // rough size estimation of STORAGE_KEY value in bytes
-            const raw = localStorage.getItem(STORAGE_KEY);
-            return raw ? new Blob([raw]).size : 0;
-        }
-        // warn when nearing typical quota
-        setInterval(()=>{
-            const used = estimateLocalStorageUsage();
-            // warn at >4MB usage
-            if(used > 4 * 1024 * 1024){
-                console.warn('LocalStorage used bytes:', used);
-                // don't spam user; show once
-                if(!sessionStorage.getItem('ls-warning-shown')){
-                    showToast('LocalStorage nearing limit. Consider exporting or using cloud storage.', 'error', 6000);
-                    sessionStorage.setItem('ls-warning-shown','1');
-                }
-            }
-        }, 5000);
-
-
-
-    
+        // Start the application
+        init().catch(console.error);
     </script>
 </body>
 </html>
