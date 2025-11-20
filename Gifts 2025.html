@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporate Gift Codes Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --accent: #3498db;
+            --accent-light: #5dade2;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --text: #333333;
+            --text-light: #7f8c8d;
+            --card-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+        }
+
+        .org-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px var(--shadow);
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--accent-light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .stat-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+
+        .stat-content p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .gift-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border-top: 4px solid var(--accent);
+        }
+
+        .gift-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px var(--shadow);
+        }
+
+        .gift-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .app-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-logo2 {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid #eee;
+        }
+
+        .app-name {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .app-badge {
+            background: var(--success);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        .register-btn2 {
+            background: var(--accent);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .register-btn2:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+        }
+
+        .code-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .code-text {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--primary);
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--secondary);
+            transform: scale(1.05);
+        }
+
+        .update {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--success);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 6px;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.4s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        .toast i {
+            color: white;
+        }
+
+        footer {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 25px 0;
+            margin-top: 40px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: var(--light);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-light);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            grid-column: 1 / -1;
+        }
+
+        .loading:after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
+            40% { color: var(--text-light); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
+            60% { text-shadow: .25em 0 0 var(--text-light), .5em 0 0 rgba(0,0,0,0); }
+            80%, 100% { text-shadow: .25em 0 0 var(--text-light), .5em 0 0 var(--text-light); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #bdc3c7;
+        }
+
+        .skeleton {
+            animation: skeleton-loading 1s linear infinite alternate;
+            border-radius: 8px;
+        }
+
+        .skeleton-text {
+            width: 100%;
+            height: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .skeleton-text-small {
+            width: 70%;
+            height: 0.8rem;
+        }
+
+        .skeleton-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+        }
+
+        .skeleton-button {
+            width: 80px;
+            height: 35px;
+            border-radius: 6px;
+        }
+
+        @keyframes skeleton-loading {
+            0% {
+                background-color: hsl(200, 20%, 80%);
+            }
+            100% {
+                background-color: hsl(200, 20%, 95%);
+            }
+        }
+
+        .skeleton-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 4px 12px var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .skeleton-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .skeleton-app-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .skeleton-code-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+            }
+            
+            .header-content {
+                text-align: center;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+          <div class="org-logo">
+                <i class="fas fa-gift"></i>             
+            </div>
+                  <div class="header-content">
+                <h1>Gift Code</h1>
+            </div>
+  
+
+        
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="active-codes">12</h3>
+                    <p>Active Gift Codes</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="updated-today">5</h3>
+                    <p>Updated Today</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="premium-offers">3</h3>
+                    <p>Premium Offers</p>
+                </div>
+            </div>
+        </div>
+        
+        <main>
+            <div id="cards" class="cards-grid">
+                <!-- Skeleton loading cards -->
+                <div class="skeleton-card">
+                    <div class="skeleton-header">
+                        <div class="skeleton-app-info">
+                            <div class="skeleton skeleton-logo"></div>
+                            <div>
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text-small"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton skeleton-button"></div>
+                    </div>
+                    <div class="skeleton-code-box">
+                        <div style="width: 100%;">
+                            <div class="skeleton skeleton-text-small" style="width: 40%; margin-bottom: 8px;"></div>
+                            <div class="skeleton skeleton-text" style="width: 70%;"></div>
+                        </div>
+                        <div class="skeleton" style="width: 40px; height: 40px; border-radius: 6px;"></div>
+                    </div>
+                    <div class="update">
+                        <div class="skeleton skeleton-text-small" style="width: 60%;"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-header">
+                        <div class="skeleton-app-info">
+                            <div class="skeleton skeleton-logo"></div>
+                            <div>
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text-small"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton skeleton-button"></div>
+                    </div>
+                    <div class="skeleton-code-box">
+                        <div style="width: 100%;">
+                            <div class="skeleton skeleton-text-small" style="width: 40%; margin-bottom: 8px;"></div>
+                            <div class="skeleton skeleton-text" style="width: 70%;"></div>
+                        </div>
+                        <div class="skeleton" style="width: 40px; height: 40px; border-radius: 6px;"></div>
+                    </div>
+                    <div class="update">
+                        <div class="skeleton skeleton-text-small" style="width: 60%;"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-header">
+                        <div class="skeleton-app-info">
+                            <div class="skeleton skeleton-logo"></div>
+                            <div>
+                                <div class="skeleton skeleton-text"></div>
+                                <div class="skeleton skeleton-text-small"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton skeleton-button"></div>
+                    </div>
+                    <div class="skeleton-code-box">
+                        <div style="width: 100%;">
+                            <div class="skeleton skeleton-text-small" style="width: 40%; margin-bottom: 8px;"></div>
+                            <div class="skeleton skeleton-text" style="width: 70%;"></div>
+                        </div>
+                        <div class="skeleton" style="width: 40px; height: 40px; border-radius: 6px;"></div>
+                    </div>
+                    <div class="update">
+                        <div class="skeleton skeleton-text-small" style="width: 60%;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <div class="footer-content">
+                <div>
+                    <p>&copy; <span id="year">2023</span> Corporate Solutions Inc. All rights reserved.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Contact Support</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span>Code copied to clipboard</span>
+    </div>
+
+    <script type="module">
+        // Firebase configuration and code from your provided script
+        const firebaseConfig = {
+            apiKey: "AIzaSyAt8o7iIxPVH7xv8FWY82COtH9WCj5DOjs",
+            authDomain: "madara-web.firebaseapp.com",
+            databaseURL: "https://madara-web-default-rtdb.firebaseio.com",
+            projectId: "madara-web",
+            storageBucket: "madara-web.firebasestorage.app",
+            messagingSenderId: "34918030636",
+            appId: "1:34918030636:web:bebec895d5c9d604346089"
+        };
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const cardsEl = document.getElementById('cards');
+        const toast = document.getElementById('toast');
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // listen to /gifts node in realtime db
+        const giftsRef = ref(db, 'gifts');
+
+        onValue(giftsRef, (snapshot) => {
+            const data = snapshot.val() || {};
+            renderCards(data);
+            updateStats(data);
+        }, (err) => {
+            console.error('DB read error', err);
+            cardsEl.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><h3>Failed to load gift codes</h3><p>Please check your connection and try again.</p></div>';
+            showToast('Failed to load gift codes', 'error');
+        });
+
+        function renderCards(data) {
+            // data shape: { key1: { name, code, updated, registerUrl, img }, key2: {...}, ... }
+            const keys = Object.keys(data);
+            if (keys.length === 0) {
+                cardsEl.innerHTML = '<div class="empty-state"><i class="fas fa-gift"></i><h3>No gift codes available</h3><p>Check back later for new corporate offers.</p></div>';
+                return;
+            }
+
+            cardsEl.innerHTML = keys.map(k => {
+                const item = data[k] || {};
+                const name = item.name || 'Unknown';
+                const code = item.code || 'No codes yet';
+                const updated = item.updated || '--/--/----';
+                const img = item.img || 'https://i.ibb.co/Mh0bJpW/dmwin.jpg';
+                const url = item.registerUrl || '#';
+                // each card gets data-key attribute for copy
+                return `
+                <div class="gift-container" data-key="${escapeHtml(k)}">
+                    <div class="gift-header">
+                        <div class="app-info">
+                            <img src="${escapeHtml(img)}" class="app-logo2" alt="${escapeHtml(name)}" loading="lazy">
+                            <div>
+                                <div class="app-name">${escapeHtml(name)}</div>
+                                <span class="app-badge">Verified Partner</span>
+                            </div>
+                        </div>
+                        <a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="register-btn2">Register</a>
+                    </div>
+
+                    <div class="code-box">
+                        <div>
+                            <div style="opacity:.7;font-size:13px">Corporate Gift Code</div>
+                            <div class="code-text" data-code>${escapeHtml(code)}</div>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:center">
+                            <button class="copy-btn" data-copy title="Copy" aria-label="Copy code to clipboard"><i class="far fa-copy"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="update">Last updated: <span data-updated>${escapeHtml(updated)}</span></div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats(data) {
+            const keys = Object.keys(data);
+            document.getElementById('active-codes').textContent = keys.length;
+            
+            // Simple logic to count codes updated today (for demo purposes)
+            const today = new Date().toLocaleDateString();
+            let updatedToday = 0;
+            keys.forEach(k => {
+                const item = data[k] || {};
+                if (item.updated && item.updated.includes(today.substring(0, 5))) {
+                    updatedToday++;
+                }
+            });
+            document.getElementById('updated-today').textContent = updatedToday;
+            
+            // Set premium offers to a fixed ratio for demo
+            document.getElementById('premium-offers').textContent = Math.max(1, Math.floor(keys.length / 4));
+        }
+
+        // handle copy buttons via delegation
+        document.addEventListener('click', (e) => {
+            const copyBtn = e.target.closest('[data-copy]');
+            if (!copyBtn) return;
+            const card = copyBtn.closest('.gift-container');
+            if (!card) return;
+            const codeEl = card.querySelector('[data-code]');
+            const code = codeEl ? codeEl.textContent.trim() : '';
+            if (!code || code === 'No codes yet') {
+                showToast('No code to copy', 'error');
+                return;
+            }
+            copyToClipboard(code);
+            showToast('Code copied to clipboard');
+        });
+
+        function copyToClipboard(text) {
+            // modern clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).catch(err => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+        
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+            } catch (e) {
+                console.error('copy failed', e);
+                showToast('Failed to copy code', 'error');
+                return;
+            }
+            ta.remove();
+        }
+
+        // enhanced toast with type support
+        let toastTimer = null;
+        function showToast(msg = 'Done', type = 'success') {
+            const icon = type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+            toast.innerHTML = `<i class="${icon}"></i><span>${msg}</span>`;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 2300);
+        }
+
+        // basic HTML escaping to avoid injected markup from DB
+        function escapeHtml(s) {
+            if (s === undefined || s === null) return '';
+            return String(s)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+    </script>
+</body>
+</html>
